@@ -27,7 +27,7 @@ Verkabelt den Wemos D1 mini mit dem LCD Screen wie auf diesem Bild: https://i2.w
 
 5.) Unter "Werkzeuge" -> "Port" den Port auswählen, in dem usb vorkommt.
 
-6.) Alles aus der Datei bus.c in diesem Repository kopieren und den Code in den Sketch einfügen.
+6.) Alles aus der Datei bus/bus.ino in diesem Repository kopieren und den Code in den Sketch einfügen.
 
 7.) Pakete installieren, im Zweifel Google nutzen, um die fehlenden Pakete zu finden
 
