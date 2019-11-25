@@ -14,9 +14,15 @@ Verkabelt den Wemos D1 mini mit dem LCD Screen wie auf diesem Bild: https://i2.w
 
 ## Software aufspielen
 1.) Verbinde den Wemos D1 per USB-Kabel mit dem Computer.
+
 2.) Öffnet die Arduino IDE
+
 3.) In der Arduino IDE Einstellungen öffnen -> unter "Zusätzliche Boardverwalter-URLs" "http://arduino.esp8266.com/stable/package_esp8266com_index.json" einfügen.
+
 4.) Unter "Werkzeuge" -> "Board" -> "Wemos D1 R1" auswählen.
+
 5.) Unter "Werkzeuge" -> "Port" den Port auswählen, in dem usb vorkommt.
+
 6.) Alles aus der Datei bus.c in diesem Repository kopieren und den Code in den Sketch einfügen.
-7.) Pakete installieren
+
+7.) Pakete installieren, im Zweifel Google nutzen, um die fehlenden Pakete zu finden
