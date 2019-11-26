@@ -38,4 +38,9 @@ Verkabelt den Wemos D1 mini mit dem LCD Screen wie auf diesem Bild: https://i2.w
 10.) Per "Überprüfen" und "Hochladen" kompilieren und auf den angeschlossenen Arduino hochladen.
 
 ## Anmerkung
-Ich bin nicht gerade ein C++ Experte, nutze sonst eigentlich vor allem Python, deswegen kann es gut sein, dass das Ganze deutlich effizienter machbar ist. Wenn jemand Ideen hat, um den Code zu verbessern, nehme ich gerne Pull-Requests an. Ich habe übrigens festgestellt, dass es manchmal zu Problemen kommt, wenn sehr viele Busse an einer Haltestelle fahren. Ich denke, dass das irgendein Speicher-Problem ist, konnte aber noch nicht herausfinden, wie man das behebt. 
+Ich bin nicht gerade ein C++ Experte, nutze sonst eigentlich vor allem Python, deswegen kann es gut sein, dass das Ganze deutlich effizienter machbar ist. Wenn jemand Ideen hat, um den Code zu verbessern, nehme ich gerne Pull-Requests an. 
+
+## Bisher ungelöste Probleme
+1.) Ich habe festgestellt, dass es manchmal zu Problemen kommt, wenn sehr viele Busse an einer Haltestelle fahren. Ich denke, dass das irgendein Speicher-Problem ist, konnte aber noch nicht herausfinden, wie man das behebt. 
+
+2.) Fährt ein Bus an beiden Haltestellen, wird die Abfahrt nur an der präferierten Haltestelle angezeigt (Präferieren tut man, in dem Array mit Haltestellennummern die Haltestellen sortiert, je weiter vorne, desto höher die Präferenz). Das funktioniert auch, hat allerdings ein Problem: Sollte der Bus an der Primärhaltestelle abgefahren sein, an der Sekundärhaltestelle aber noch nicht, wird der Bus noch angezeigt, man weiß allerdings nicht, dass er nur noch an der Sekundärhaltestelle kommt. Das könnte zu Verwirrung führen. Lösungsvorschläge sind willkommen.
