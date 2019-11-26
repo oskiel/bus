@@ -36,3 +36,6 @@ Verkabelt den Wemos D1 mini mit dem LCD Screen wie auf diesem Bild: https://i2.w
 9.) https://www.kvg-kiel.de/fahrplan/echtzeit/ hier die eigene Haltestellen herausfinden. Wenn man die Haltestelle sucht und auswählt, sieht man oben in der Adressleiste https://www.kvg-kiel.de/fahrplan/echtzeit/#?stop=1062&language=de die Nummer der Haltestelle (1062 in diesem Beispiel). Die kopieren und im Code einfügen. Es können zwei Haltestellen ausgewählt werden und in die Felder eingetragen werden.
 
 10.) Per "Überprüfen" und "Hochladen" kompilieren und auf den angeschlossenen Arduino hochladen.
+
+## Anmerkung
+Ich bin nicht gerade ein C++ Experte, nutze sonst eigentlich vor allem Python, deswegen kann es gut sein, dass das Ganze deutlich effizienter machbar ist. Wenn jemand Ideen hat, um den Code zu verbessern, nehme ich gerne Pull-Requests an. Ich habe übrigens festgestellt, dass es manchmal zu Problemen kommt, wenn sehr viele Busse an einer Haltestelle fahren. Ich denke, dass das irgendein Speicher-Problem ist, konnte aber noch nicht herausfinden, wie man das behebt. 
