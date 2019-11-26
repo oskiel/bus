@@ -3,11 +3,13 @@
 #include             <WiFiClientSecure.h>
 #include             <ArduinoJson.h>
 #include             <LiquidCrystal_I2C.h>
+#include <vector>
+#include <algorithm>    // std::sort
 
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 
-char                password[]            = "HIER WIFI PASSWORT EINGEBEN";
-char                ssid[]                = "FRITZ!Box 7560 ML <- DURCH NAMEN DES EIGENEN NETZWERKS ERSETZEN";
+char                password[]            = "WIFI PASSWORT"; // Hier WIFI Passwort einfügen
+char                ssid[]                = "WIFI NAME"; // Hier WIFI Name einfügen, z.B. FRITZ!BOX 6340 SL
 int                 status;
 const char fingerprint[] PROGMEM = "CF EB 29 32 EE BF 3B FD 7C 77 47 E1 D3 BD D9 9A D8 41 81 93";
 const char* host = "kvg-kiel.de";
@@ -16,11 +18,16 @@ const int httpsPort = 443;
 WiFiClientSecure client;
 
 struct Data { 
-    char* dir; 
-    char* actualTime;
+  public:
+    const char* dir; 
+    int actualRelativeTime;
+    const char* stopName;
+    const char* patternText;
     int minutes;
     int seconds;
 }; 
+
+bool sortFunction (Data i,Data j) { return (i.actualRelativeTime<j.actualRelativeTime); }
 
 String get_data(String number) {
   String url = "/internetservice/services/passageInfo/stopPassages/stop?mode=departure&stop=" + number;
@@ -69,60 +76,92 @@ void setup() {
 
 void loop() {
 
-  String stop1 = get_data("1079"); // HIER DIE NUMMER DER EIGENEN HALTESTELLE EINGEBEN
-  String stop2 = get_data("1062"); // HIER DIE NUMMER DER EIGENEN HALTESTELLE EINGEBEN
+  String stops[] = {"1491", "2652"}; // LISTE DER STOPS ausfuellen. 
 
-  const size_t bufferSize = JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(8) + 370;
+  std::vector<Data> data;
+  const size_t bufferSize = 8*JSON_ARRAY_SIZE(0) + 7*JSON_ARRAY_SIZE(2) + JSON_ARRAY_SIZE(6) + JSON_ARRAY_SIZE(14) + 6*JSON_OBJECT_SIZE(7) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(10) + 14*JSON_OBJECT_SIZE(11) + 9177;
   DynamicJsonBuffer jsonBuffer(bufferSize);
-  JsonObject& root1 = jsonBuffer.parseObject(stop1);
-  JsonObject& root2 = jsonBuffer.parseObject(stop2);
+  int numberOfDepartures = 0;
+  String jsonString;
+  int len;
+  
+  for (int i = 0; i < sizeof(stops)/sizeof(stops[0]); i++) {
+    jsonString = get_data(stops[i]);
+    JsonObject& root = jsonBuffer.parseObject(jsonString);
+    
+    len = root["actual"].size();
 
-  int len = root1["actual"].size();
-  int len2 = root2["actual"].size();
+    int actualRelativeTime;
+    char* dir;
+    char* actualTime;
+    char* patternText;
+    char* stopName;
+    Serial.println(len);
 
-  int actualRelativeTime1;
-  int actualRelativeTime2;
-  const char* dir;
-  const char* actualTime;
-  const char* patternText;
+    for (int i = 0; i < len; i ++){
+      actualRelativeTime = root["actual"][i]["actualRelativeTime"];
+      
+      Data d;
+      d.actualRelativeTime = actualRelativeTime;
+      d.dir = root["actual"][i]["direction"];
+      d.minutes = actualRelativeTime/60;
+      d.stopName = root["stopName"];
+      d.patternText = root["actual"][i]["patternText"];
 
-  int minutes;
-  int seconds;
+      bool insert = true;
 
-  lcd.clear();
-  int j = 0;
-  int k = 0;
-  for (int i = 0; i < len + len2 && i < 4; i ++){
-    actualRelativeTime1 = root1["actual"][j]["actualRelativeTime"];
-    actualRelativeTime2 = root2["actual"][k]["actualRelativeTime"];
+      for(int j = 0; j < numberOfDepartures; j++) {
+        if (*d.patternText == *data[j].patternText && *d.stopName != *data[j].stopName) {
+          Serial.println("No insert");
+          insert = false;
+        }
+      }
 
-    if (actualRelativeTime1 < actualRelativeTime2) {
-      minutes = actualRelativeTime1/60;
-      seconds = actualRelativeTime1%60;
-      dir = root1["actual"][j]["direction"];
-      actualTime = root1["actual"][j]["actualTime"];
-      patternText = root1["actual"][j]["patternText"];
-      lcd.setCursor(0,i);
-      lcd.print(patternText);
-      lcd.setCursor(3, i);
-      lcd.print(dir);
-      lcd.setCursor(18,i);
-      lcd.print(minutes);
-      j++;
-    } else {
-      minutes = actualRelativeTime2/60;
-      seconds = actualRelativeTime2%60;
-      dir = root2["actual"][k]["direction"];
-      actualTime = root2["actual"][k]["actualTime"];
-      patternText = root2["actual"][k]["patternText"];
-      lcd.setCursor(0,i);
-      lcd.print(patternText);
-      lcd.setCursor(3, i);
-      lcd.print(dir);
-      lcd.setCursor(18,i);
-      lcd.print(minutes);
-      k++;
+      if (insert) {
+         numberOfDepartures++;
+         data.push_back(d);
+      }
     }
+
+    delay(1000);
   }
 
+  std::sort (data.begin(), data.end(), sortFunction);
+
+  lcd.clear();
+
+  for (int i = 0; i < numberOfDepartures && i < 4; i++) {
+    lcd.setCursor(0,i);
+    lcd.print(data[i].patternText);
+    lcd.setCursor(3, i);
+    lcd.print(data[i].dir);
+    lcd.setCursor(18,i);
+    lcd.print(data[i].minutes);
+  }
+
+  delay(5000);
+
+  if (numberOfDepartures > 4) {
+    lcd.clear();
+    for (int i = 4; i < numberOfDepartures && i < 8; i++) {
+      lcd.setCursor(0,i - 4);
+      lcd.print(data[i].patternText);
+      lcd.setCursor(3, i - 4);
+      lcd.print(data[i].dir);
+      lcd.setCursor(18,i - 4);
+      lcd.print(data[i].minutes);
+    }
+
+    delay(5000);
+    lcd.clear();
+  
+    for (int i = 0; i < numberOfDepartures && i < 4; i++) {
+      lcd.setCursor(0,i);
+      lcd.print(data[i].patternText);
+      lcd.setCursor(3, i);
+      lcd.print(data[i].dir);
+      lcd.setCursor(18,i);
+      lcd.print(data[i].minutes);
+    }
+  }
 }
