@@ -3,6 +3,7 @@
 #include             <WiFiClientSecure.h>
 #include             <ArduinoJson.h>
 #include             <LiquidCrystal_I2C.h>
+#include <HttpClient.h>
 #include <vector>
 #include <algorithm>    // std::sort
 
@@ -29,30 +30,16 @@ struct Data {
 
 bool sortFunction (Data i,Data j) { return (i.actualRelativeTime<j.actualRelativeTime); }
 
-String get_data(String number) {
+void get_data(DynamicJsonBuffer jsonBuffer,String number) {
   String url = "/internetservice/services/passageInfo/stopPassages/stop?mode=departure&stop=" + number;
-
-  client.setFingerprint(fingerprint);
-
-  if (!client.connect(host, httpsPort)) {
-    Serial.println("connection failed");
-  }
-
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-             "Host: " + host + "\r\n" +
-             "User-Agent: Firefox\r\n" +
-             "Connection: close\r\n\r\n");
-
-  Serial.println("request sent");
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    if (line == "\r") {
-      Serial.println("headers received");
-      break;
-    }
-  }
-
-  return client.readString();
+  HTTPClient http;
+  http.begin(host+url, fingerprint);
+  http.GET();
+  // Get a reference to the stream in HTTPClient
+  Stream& response = http.getStream();
+  // Deserialize the JSON document in the response
+  deserializeJson(jsonBuffer, response);
+  http.end();
 }
 
 void setup() {
@@ -86,7 +73,7 @@ void loop() {
   int len;
   
   for (int i = 0; i < sizeof(stops)/sizeof(stops[0]); i++) {
-    jsonString = get_data(stops[i]);
+    get_data(jsonBuffer,stops[i]);
     JsonObject& root = jsonBuffer.parseObject(jsonString);
     
     len = root["actual"].size();
