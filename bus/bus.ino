@@ -39,6 +39,7 @@ void get_data(DynamicJsonBuffer jsonBuffer,String number) {
   Stream& response = http.getStream();
   // Deserialize the JSON document in the response
   deserializeJson(jsonBuffer, response);
+  http.end();
 }
 
 void setup() {
