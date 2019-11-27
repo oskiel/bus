@@ -30,7 +30,7 @@ struct Data {
 
 bool sortFunction (Data i,Data j) { return (i.actualRelativeTime<j.actualRelativeTime); }
 
-String get_data(DynamicJsonBuffer jsonBuffer,String number) {
+void get_data(DynamicJsonBuffer jsonBuffer,String number) {
   String url = "/internetservice/services/passageInfo/stopPassages/stop?mode=departure&stop=" + number;
   HTTPClient http;
   http.begin(host+url, fingerprint);
